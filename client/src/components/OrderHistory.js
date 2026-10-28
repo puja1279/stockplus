@@ -5,6 +5,7 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
   const [filters, setFilters] = useState({
     type: "all",
     status: "all",
@@ -13,34 +14,76 @@ const OrderHistory = () => {
   });
 
   useEffect(() => {
-    loadOrders();
+    checkAuthentication();
   }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      loadOrders();
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     filterOrders();
   }, [filters, orders]);
 
+  const checkAuthentication = () => {
+    console.log("Checking authentication...");
+    
+    // Check if user is logged in using your login system's approach
+    const token = localStorage.getItem("token");
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    
+    console.log("Token found:", !!token);
+    console.log("Logged in user:", loggedInUser);
+    
+    if (token && loggedInUser) {
+      setCurrentUser(loggedInUser);
+    } else {
+      setCurrentUser(null);
+      setLoading(false);
+    }
+  };
+
   const loadOrders = () => {
-    console.log("Loading order history from localStorage...");
+    if (!currentUser) {
+      console.log("No user logged in, cannot load orders");
+      setOrders([]);
+      setFilteredOrders([]);
+      setLoading(false);
+      return;
+    }
+
+    console.log("Loading order history for user:", currentUser.email);
     setLoading(true);
     
     try {
-      // Try multiple possible storage keys
-      let savedOrders = JSON.parse(localStorage.getItem("orderHistory")) || [];
+      // Use user-specific storage key
+      const userOrderKey = `orderHistory_${currentUser.email}`;
+      const globalOrderKey = "orderHistory";
       
-      // If no orders found, try other possible keys
+      console.log("Looking for orders with key:", userOrderKey);
+      
+      // First try user-specific orders
+      let savedOrders = JSON.parse(localStorage.getItem(userOrderKey)) || [];
+      
+      // If no user-specific orders found, check global orders and filter by user
       if (savedOrders.length === 0) {
-        savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
-      }
-      if (savedOrders.length === 0) {
-        savedOrders = JSON.parse(localStorage.getItem("transactions")) || [];
+        console.log("No user-specific orders found, checking global orders...");
+        const globalOrders = JSON.parse(localStorage.getItem(globalOrderKey)) || [];
+        
+        // Filter global orders by current user
+        savedOrders = globalOrders.filter(order => 
+          order.userId === currentUser.email || order.userEmail === currentUser.email
+        );
+        console.log("Filtered global orders for user:", savedOrders.length);
       }
 
-      console.log("Orders found:", savedOrders);
+      console.log("Orders found for user:", savedOrders);
       
-      // If still no orders, create sample data
+      // If still no orders, create sample data for the current user
       if (savedOrders.length === 0) {
-        console.log("No orders found, creating sample data");
+        console.log("No orders found, creating sample data for user:", currentUser.email);
         savedOrders = [
           {
             id: "ORD001",
@@ -54,7 +97,9 @@ const OrderHistory = () => {
             timestamp: new Date().toISOString(),
             fees: 28.50,
             executedPrice: 2848,
-            executedQuantity: 10
+            executedQuantity: 10,
+            userId: currentUser.email,
+            userEmail: currentUser.email
           },
           {
             id: "ORD002", 
@@ -68,34 +113,43 @@ const OrderHistory = () => {
             timestamp: new Date(Date.now() - 86400000).toISOString(),
             fees: 19.25,
             executedPrice: 3852,
-            executedQuantity: 5
+            executedQuantity: 5,
+            userId: currentUser.email,
+            userEmail: currentUser.email
           }
         ];
-        localStorage.setItem("orderHistory", JSON.stringify(savedOrders));
+        localStorage.setItem(userOrderKey, JSON.stringify(savedOrders));
       }
       
-      // Ensure each order has required fields
-      const validatedOrders = savedOrders.map(order => ({
-        id: order.id || `ORD${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        symbol: order.symbol || "UNKNOWN",
-        name: order.name || "Unknown Stock",
-        type: order.type || "buy",
-        quantity: order.quantity || 0,
-        price: order.price || 0,
-        total: order.total || 0,
-        status: order.status || "completed",
-        timestamp: order.timestamp || new Date().toISOString(),
-        fees: order.fees || 0,
-        executedPrice: order.executedPrice || order.price || 0,
-        executedQuantity: order.executedQuantity || order.quantity || 0
-      }));
+      // Ensure each order has required fields and belongs to current user
+      const validatedOrders = savedOrders
+        .filter(order => 
+          order.userId === currentUser.email || 
+          order.userEmail === currentUser.email
+        )
+        .map(order => ({
+          id: order.id || `ORD${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          symbol: order.symbol || "UNKNOWN",
+          name: order.name || "Unknown Stock",
+          type: order.type || "buy",
+          quantity: order.quantity || 0,
+          price: order.price || 0,
+          total: order.total || 0,
+          status: order.status || "completed",
+          timestamp: order.timestamp || new Date().toISOString(),
+          fees: order.fees || 0,
+          executedPrice: order.executedPrice || order.price || 0,
+          executedQuantity: order.executedQuantity || order.quantity || 0,
+          userId: order.userId || currentUser.email,
+          userEmail: order.userEmail || currentUser.email
+        }));
       
-      console.log("Validated orders:", validatedOrders);
+      console.log("Validated orders for current user:", validatedOrders);
       setOrders(validatedOrders);
       setFilteredOrders(validatedOrders);
     } catch (error) {
       console.error("Error loading orders:", error);
-      // Create sample data on error
+      // Create sample data on error for current user
       const sampleOrders = [
         {
           id: "ORD001",
@@ -109,7 +163,9 @@ const OrderHistory = () => {
           timestamp: new Date().toISOString(),
           fees: 28.50,
           executedPrice: 2848,
-          executedQuantity: 10
+          executedQuantity: 10,
+          userId: currentUser.email,
+          userEmail: currentUser.email
         }
       ];
       setOrders(sampleOrders);
@@ -183,13 +239,27 @@ const OrderHistory = () => {
   };
 
   const clearAllOrders = () => {
-    if (window.confirm("Are you sure you want to clear all order history?")) {
-      localStorage.removeItem("orderHistory");
-      localStorage.removeItem("orders");
-      localStorage.removeItem("transactions");
+    if (!currentUser) {
+      alert("You must be logged in to clear orders");
+      return;
+    }
+
+    if (window.confirm("Are you sure you want to clear all your order history?")) {
+      const userOrderKey = `orderHistory_${currentUser.email}`;
+      
+      // Remove user-specific orders
+      localStorage.removeItem(userOrderKey);
+      
+      // Also remove user's orders from global storage if they exist there
+      const globalOrders = JSON.parse(localStorage.getItem("orderHistory")) || [];
+      const filteredGlobalOrders = globalOrders.filter(order => 
+        order.userId !== currentUser.email && order.userEmail !== currentUser.email
+      );
+      localStorage.setItem("orderHistory", JSON.stringify(filteredGlobalOrders));
+      
       setOrders([]);
       setFilteredOrders([]);
-      alert("Order history cleared!");
+      alert("Your order history has been cleared!");
     }
   };
 
@@ -224,6 +294,15 @@ const OrderHistory = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("loggedInUser");
+    setCurrentUser(null);
+    setOrders([]);
+    setFilteredOrders([]);
+    window.location.href = '/login';
+  };
+
   if (loading) {
     return (
       <div className="order-history-loading">
@@ -233,11 +312,35 @@ const OrderHistory = () => {
     );
   }
 
+  if (!currentUser) {
+    return (
+      <div className="order-history-container">
+        <div className="not-logged-in">
+          <div className="not-logged-in-icon">🔒</div>
+          <h2>Authentication Required</h2>
+          <p>Please log in to view your order history</p>
+          <button 
+            onClick={() => window.location.href = '/login'} 
+            className="login-btn"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="order-history-container">
       {/* Header */}
       <div className="order-history-header">
-        <h1>📋 Order History</h1>
+        <div className="header-user-info">
+          <h1>📋 Order History</h1>
+          <div className="user-welcome">
+            Welcome, <span className="username">{currentUser.name || currentUser.email}</span>!
+            <button onClick={handleLogout} className="logout-btn">Logout</button>
+          </div>
+        </div>
         <p>Track all your trading activities and order status</p>
         <div className="header-actions">
           <button onClick={loadOrders} className="refresh-btn">🔄 Refresh</button>
@@ -247,7 +350,7 @@ const OrderHistory = () => {
 
       {/* Debug Info */}
       <div className="debug-info">
-        <p>Storage keys: {Object.keys(localStorage).join(", ")}</p>
+        <p>Logged in as: {currentUser.email}</p>
         <p>Total orders found: {orders.length}</p>
       </div>
 
@@ -306,7 +409,7 @@ const OrderHistory = () => {
             Clear Filters
           </button>
           <button onClick={clearAllOrders} className="clear-orders-btn">
-            Clear All History
+            Clear My History
           </button>
         </div>
       </div>
@@ -342,7 +445,7 @@ const OrderHistory = () => {
         {filteredOrders.length > 0 ? (
           <>
             <div className="table-info">
-              Showing {filteredOrders.length} of {orders.length} orders
+              Showing {filteredOrders.length} of {orders.length} orders for {currentUser.name || currentUser.email}
             </div>
             <table className="orders-table">
               <thead>
@@ -394,7 +497,7 @@ const OrderHistory = () => {
             <h3>No orders found</h3>
             <p>{orders.length > 0 ? 
               "No orders match your current filters. Try clearing filters to see all orders." : 
-              "Make some trades to see your order history here. Your order history is empty."
+              `Make some trades to see your order history here, ${currentUser.name || currentUser.email}. Your order history is empty.`
             }</p>
             {orders.length > 0 ? (
               <button onClick={clearFilters} className="browse-trades-btn">
