@@ -1,0 +1,86 @@
+.balance-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.balance-cards {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.balance-card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  flex: 1;
+  margin: 5px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.balance-card h4 {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.balance-card p {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.profit p {
+  color: green;
+}
+
+.loss p {
+  color: red;
+}
+
+.balance-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 15px;
+}
+
+.balance-actions button {
+  padding: 10px 15px;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.balance-actions button:hover {
+  background: #0056b3;
+}
+
+.balance-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.balance-form input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.balance-form button {
+  padding: 8px;
+  border: none;
+  background: green;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.balance-form button:hover {
+  background: darkgreen;
+}

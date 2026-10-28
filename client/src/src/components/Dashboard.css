@@ -1,0 +1,51 @@
+.dashboard-container {
+  padding: 30px;
+  background-color: #f0f2f5;
+  min-height: 100vh;
+}
+
+.dashboard-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.stock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.stock-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+}
+
+.stock-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.stock-price {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 6px 0;
+}
+
+.stock-change {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.green {
+  color: #0f9d58;
+}
+
+.red {
+  color: #db4437;
+}

@@ -1,0 +1,77 @@
+.register-wrapper {
+  background: url("https://media.warriortrading.com/2019/08/TradingView.jpg");
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-form {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 350px;
+  color: white;
+  text-align: center;
+  animation: fadeIn 1s ease-in;
+}
+
+.register-form h2 {
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.register-form input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.register-form input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #000;
+}
+
+.register-form button {
+  background-color: #00b894;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  margin-top: 15px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.register-form button:hover {
+  background-color: #019875;
+}
+
+.register-form a {
+  color: #81ecec;
+  text-decoration: none;
+}
+
+.register-form a:hover {
+  text-decoration: underline;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
